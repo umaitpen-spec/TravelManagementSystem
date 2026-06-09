@@ -1,0 +1,5 @@
+- [ ] Diagnose “Add booking” failure by aligning booking form action/fields with backend PageController POST handler
+- [ ] Fix backend template: backend/src/main/resources/templates/booking.html (form action/method/field names + remove buggy trip==1 block)
+- [ ] Fix frontend duplicate template: frontend/templates/booking.html (add method/action + name attributes so it can submit correctly)
+- [ ] Validate PageController POST /trips/{id}/bookings parameters match the form field names
+- [ ] Quick manual test: open booking page for a trip, submit “Add booking”, confirm redirect and persistence

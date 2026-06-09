@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create Trip - Roamly</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a1a;
+      --text-secondary: #717171;
+      --text-muted: #9ca3af;
+      --accent: #1b4965;
+      --accent-hover: #0056b3;
+      --success: #008009;
+      --warning: #e8a800;
+      --danger: #c23500;
+      --border-color: #e0e0e0;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--bg-secondary) !important;
+      padding: 0.8rem 2rem;
+      box-shadow: var(--shadow-sm);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar-brand {
+      color: var(--accent) !important;
+      font-weight: 700;
+      font-size: 1.4rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .navbar-brand .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .nav-link-item {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0.5rem 0;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .nav-link-item:hover, .nav-link-item.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .welcome-text { color: var(--text-secondary); font-size: 0.9rem; }
+    .btn-signout {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-signout:hover {
+      background: var(--text-primary);
+      color: white;
+      border-color: var(--text-primary);
+    }
+
+    /* Main Container */
+    .page-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Hero Header */
+    .hero-header {
+      background: var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero-header::after {
+      content: '✈️';
+      position: absolute;
+      font-size: 6rem;
+      opacity: 0.15;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .hero-header h1 {
+      color: white;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .hero-header p {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    /* Form Card */
+    .form-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      padding: 2.5rem;
+    }
+    .form-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-card h3 i {
+      color: var(--accent);
+    }
+
+    /* Form Styles */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      transition: color 0.3s ease;
+      z-index: 2;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      background: #fafafa;
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+
+    .form-control::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(27, 73, 101, 0.1);
+    }
+
+    /* Date input styling */
+    input[type="date"] {
+      color-scheme: light;
+    }
+
+    /* Number input spinners */
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      border: none;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+      color: white;
+    }
+
+    .btn-submit i {
+      font-size: 1.2rem;
+    }
+
+    /* Back Link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--accent);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar { padding: 0.75rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+      .nav-links { display: none; }
+      .page-container { padding: 1rem; }
+      .form-card { padding: 1.5rem; }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .form-card { animation: fadeInUp 0.4s ease-out; }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a class="navbar-brand" href="/">
+      <span class="brand-icon"><i class="bi bi-globe-americas"></i></span>
+      Roamly
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link-item">Dashboard</a>
+      <a href="/trips/new" class="nav-link-item active">Plan a Trip</a>
+      <a href="/my-bookings" class="nav-link-item">My Bookings</a>
+      <a href="/hotels" class="nav-link-item">Hotels</a>
+      <a href="/flights/search" class="nav-link-item">Flights</a>
+      <a href="/expenses" class="nav-link-item">Expenses</a>
+    </div>
+    <div class="nav-user">
+      <span class="welcome-text" th:text="${userName != null} ? ('Welcome, ' + ${userName}) : ''"></span>
+      <form method="post" action="/logout" class="mb-0">
+        <button type="submit" class="btn-signout">Sign Out</button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="page-container">
+    <!-- Hero Header -->
+    <div class="hero-header">
+      <h1>✈️ Create Your Next Adventure</h1>
+      <p>Plan your dream journey effortlessly.</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card">
+      <a href="/" class="back-link">
+        <i class="bi bi-arrow-left"></i>
+        <span>Back to Dashboard</span>
+      </a>
+
+      <h3><i class="bi bi-compass"></i> Trip Details</h3>
+
+      <form id="tripForm" method="post" action="/trips">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Trip Title</label>
+            <div class="input-wrapper">
+              <input type="text" class="form-control" id="title" name="title" placeholder="Weekend getaway" required>
+              <i class="bi bi-compass input-icon"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Destination</label>
+            <div class="input-wrapper">
+              <input type="text" class="form-control" id="destination" name="destination" placeholder="Goa" required>
+              <i class="bi bi-geo-alt input-icon"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <div class="input-wrapper">
+              <input type="date" class="form-control" id="startDate" name="startDate" required>
+              <i class="bi bi-calendar-event input-icon"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>End Date</label>
+            <div class="input-wrapper">
+              <input type="date" class="form-control" id="endDate" name="endDate" required>
+              <i class="bi bi-calendar-check input-icon"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Travelers</label>
+            <div class="input-wrapper">
+              <input type="number" class="form-control" id="travelers" name="travelers" min="1" value="2" required>
+              <i class="bi bi-people input-icon"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Budget (INR)</label>
+            <div class="input-wrapper">
+              <input type="number" class="form-control" id="budget" name="budget" placeholder="50000" required>
+              <i class="bi bi-currency-rupee input-icon"></i>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-submit" type="submit">
+          <i class="bi bi-airplane"></i>
+          <span>Create Trip</span>
+        </button>
+      </form>
+    </div>
+  </div>
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const dest = params.get('destination');
+      if (dest) {
+        document.getElementById('destination').value = decodeURIComponent(dest);
+      }
+    })();
+  </script>
+</body>
+</html>

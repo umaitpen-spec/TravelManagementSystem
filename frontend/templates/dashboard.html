@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - Roamly</title>
+  <link href="/static/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --card-shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    .navbar {
+      background: var(--primary-gradient) !important;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 15px rgba(102, 126, 234, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar-brand {
+      color: white !important;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .navbar-brand:hover {
+      color: rgba(255,255,255,0.9) !important;
+    }
+
+    .welcome-text {
+      color: rgba(255,255,255,0.95);
+      font-weight: 500;
+    }
+
+    .btn-signout {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      transition: var(--transition);
+    }
+
+    .btn-signout:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.5);
+      color: white;
+    }
+
+    .main-content {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Header Section */
+    .dashboard-header {
+      background: var(--primary-gradient);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .dashboard-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+
+    .dashboard-header::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      right: 10%;
+      width: 200px;
+      height: 200px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .header-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin: 0;
+    }
+
+    .header-icon {
+      font-size: 2.5rem;
+      opacity: 0.3;
+      position: absolute;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Alert Messages */
+    .alert-success, .alert-danger {
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      font-weight: 500;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    /* Analytics Cards */
+    .analytics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .analytics-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .analytics-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    .analytics-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--primary-gradient);
+    }
+
+    .analytics-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .icon-trip {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      color: #0284c7;
+    }
+
+    .icon-budget {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #d97706;
+    }
+
+    .analytics-card h5 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #6b7280;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .analytics-card .trip-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .analytics-card .trip-dest {
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .budget-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-optimal {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-under {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-over {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-none {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    .budget-amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .budget-label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    /* Content Row */
+    .content-row {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .content-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Trips Section */
+    .section-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--card-shadow);
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title i {
+      color: #667eea;
+    }
+
+    /* Trip Cards */
+    .trip-card {
+      display: block;
+      background: linear-gradient(135deg, #fafafa 0%, #f3f4f6 100%);
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: var(--transition);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .trip-card:hover {
+      transform: translateX(4px);
+      border-color: #667eea;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+    }
+
+    .trip-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .trip-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+
+    .trip-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .trip-card-date {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      white-space: nowrap;
+    }
+
+    .trip-card-dest {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .trip-card-dest i {
+      color: #667eea;
+    }
+
+    .trip-card-footer {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .budget-chip {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .destination-badge {
+      background: white;
+      border: 1px solid #e5e7eb;
+      color: #6b7280;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: #9ca3af;
+    }
+
+    .empty-state i {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      color: #d1d5db;
+    }
+
+    .empty-state h6 {
+      font-size: 1rem;
+      color: #6b7280;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-cta {
+      background: var(--primary-gradient);
+      border: none;
+      color: white;
+      padding: 0.6rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+
+    /* Quick Actions Panel */
+    .quick-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, #fafafa 0%, #f3f4f6 100%);
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: #4b5563;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .action-btn:hover {
+      background: white;
+      border-color: #667eea;
+      color: #667eea;
+      transform: translateX(4px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+    }
+
+    .action-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .action-btn:nth-child(1) .action-icon {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      color: #2563eb;
+    }
+
+    .action-btn:nth-child(2) .action-icon {
+      background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+      color: #db2777;
+    }
+
+    .action-btn:nth-child(3) .action-icon {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #059669;
+    }
+
+    .action-btn:nth-child(4) .action-icon {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #d97706;
+    }
+
+    .action-btn:nth-child(5) .action-icon {
+      background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+      color: #4f46e5;
+    }
+
+    .action-label {
+      flex: 1;
+    }
+
+    .action-arrow {
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .action-btn:hover .action-arrow {
+      opacity: 1;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .dashboard-header {
+        padding: 1.75rem;
+      }
+
+      .header-title {
+        font-size: 1.5rem;
+      }
+
+      .header-icon {
+        display: none;
+      }
+
+      .main-content {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+  <a class="navbar-brand" href="/">Roamly</a>
+  <div class="ml-auto d-flex align-items-center">
+    <span class="welcome-text mr-3" th:text="${userName != null} ? ('✈️ Welcome, ' + ${userName}) : ''"></span>
+    <form method="post" action="/logout" class="mb-0">
+      <button type="submit" class="btn btn-signout btn-sm">Sign Out</button>
+    </form>
+  </div>
+</nav>
+
+<div class="main-content">
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="row align-items-center">
+      <div class="col">
+        <h1 class="header-title">
+          <span th:text="${userName != null} ? ${userName} : 'Traveler'"></span> 👋
+        </h1>
+        <p class="header-subtitle">Plan your dream trips, track expenses, and make every journey unforgettable.</p>
+      </div>
+      <i class="bi bi-airplane-engines header-icon d-none d-md-block"></i>
+    </div>
+  </div>
+
+  <!-- Alert Messages -->
+  <div th:if="${planSuccess != null}" class="alert alert-success" role="alert" th:text="${planSuccess}"></div>
+  <div th:if="${loginError != null}" class="alert alert-danger" role="alert" th:text="${loginError}"></div>
+
+  <!-- Analytics Cards -->
+  <div class="analytics-row">
+    <div class="analytics-card" style="animation-delay: 0.1s;">
+      <div class="analytics-icon icon-trip">📍</div>
+      <h5>Active Trip</h5>
+      <div th:if="${trips != null and !trips.isEmpty()}">
+        <div th:with="active=${trips.get(0)}">
+          <p class="trip-title" th:text="${active.title}"></p>
+          <p class="trip-dest" th:text="${active.destination}"></p>
+        </div>
+      </div>
+      <p class="text-muted mb-0" th:if="${trips == null or trips.isEmpty()}" style="font-size: 0.9rem;">No trip selected yet.</p>
+    </div>
+
+    <div class="analytics-card" style="animation-delay: 0.2s;">
+      <div class="analytics-icon icon-budget">💰</div>
+      <h5>Budget Health</h5>
+      <div th:if="${budgetAnalysis != null}">
+        <div class="mb-2">
+          <span class="budget-status"
+                th:classappend="${budgetAnalysis.status == 'OPTIMAL' ? 'status-optimal' : (budgetAnalysis.status == 'UNDER_BUDGET' ? 'status-under' : (budgetAnalysis.status == 'OVER_BUDGET' ? 'status-over' : 'status-none'))}"
+                th:text="${budgetAnalysis.status == 'NO_EXPENSES' ? '📝 No Expenses' : (budgetAnalysis.status == 'OPTIMAL' ? '✅ Optimal' : (budgetAnalysis.status == 'UNDER_BUDGET' ? '💙 Under Budget' : '🔴 Over Budget'))}">
+          </span>
+        </div>
+        <div class="budget-amount" th:text="'₹' + ${#numbers.formatDecimal(budgetAnalysis.totalBudget, 1, 2)}">₹0</div>
+        <div class="budget-label">Total Budget</div>
+      </div>
+      <div th:if="${budgetAnalysis == null}">
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">Add budget details to see analytics.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Row: My Trips + Quick Actions -->
+  <div class="content-row">
+    <!-- My Trips Section -->
+    <div class="section-card" style="animation-delay: 0.3s;">
+      <h5 class="section-title"><i class="bi bi-compass"></i> My Trips</h5>
+      <div th:if="${trips != null and !trips.isEmpty()}">
+        <a th:each="trip : ${trips}"
+           th:href="@{/trips/{id}(id=${trip.id})}"
+           class="trip-card">
+          <div class="trip-card-header">
+            <div>
+              <div class="trip-card-title" th:text="${trip.title}"></div>
+              <div class="trip-card-dest"><i class="bi bi-geo-alt"></i> <span th:text="${trip.destination}"></span></div>
+            </div>
+            <small class="trip-card-date" th:text="${trip.startDate}"></small>
+          </div>
+          <div class="trip-card-footer">
+            <span class="budget-chip" th:text="'Budget: ₹' + ${#numbers.formatDecimal(trip.budget, 1, 2)}"></span>
+          </div>
+        </a>
+      </div>
+      <div th:if="${trips == null or trips.isEmpty()}" class="empty-state">
+        <i class="bi bi-compass"></i>
+        <h6>No trips yet</h6>
+        <p>Start planning your next adventure!</p>
+        <a href="/trips/new" class="btn btn-cta">Plan Your First Trip</a>
+      </div>
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div class="section-card" style="animation-delay: 0.4s;">
+      <h5 class="section-title"><i class="bi bi-lightning"></i> What's Next</h5>
+      <div class="quick-actions">
+        <a href="/my-bookings" class="action-btn">
+          <div class="action-icon"><i class="bi bi-calendar-check"></i></div>
+          <span class="action-label">My Bookings</span>
+          <i class="bi bi-arrow-right action-arrow"></i>
+        </a>
+        <a href="/hotels" class="action-btn">
+          <div class="action-icon"><i class="bi bi-building"></i></div>
+          <span class="action-label">Search Hotels</span>
+          <i class="bi bi-arrow-right action-arrow"></i>
+        </a>
+        <a href="/flights/search" class="action-btn">
+          <div class="action-icon"><i class="bi bi-airplane"></i></div>
+          <span class="action-label">Search Flights</span>
+          <i class="bi bi-arrow-right action-arrow"></i>
+        </a>
+        <a href="/expenses" class="action-btn">
+          <div class="action-icon"><i class="bi bi-wallet2"></i></div>
+          <span class="action-label">Track spending</span>
+          <i class="bi bi-arrow-right action-arrow"></i>
+        </a>
+        <a href="/trips/new" class="action-btn">
+          <div class="action-icon"><i class="bi bi-plus-circle"></i></div>
+          <span class="action-label">Create Trip</span>
+          <i class="bi bi-arrow-right action-arrow"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

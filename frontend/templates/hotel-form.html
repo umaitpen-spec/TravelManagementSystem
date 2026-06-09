@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymele.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${hotel != null ? 'Edit Hotel' : 'Add Hotel'} + ' - Roamly'">Hotel Management - Roamly</title>
+  <link href="/static/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --card-shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .navbar {
+      background: var(--primary-gradient) !important;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 15px rgba(102, 126, 234, 0.3);
+    }
+    .navbar-brand { color: white !important; font-weight: 700; font-size: 1.5rem; }
+    .btn-back {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      transition: var(--transition);
+    }
+    .btn-back:hover { background: rgba(255,255,255,0.25); color: white; }
+    .main-content { padding: 2rem; max-width: 1000px; margin: 0 auto; }
+    .page-header {
+      background: var(--primary-gradient);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      color: white;
+    }
+    .page-header h2 { margin: 0; font-weight: 700; }
+    .page-header p { margin: 0.5rem 0 0; opacity: 0.9; }
+    .form-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 2rem;
+    }
+    .form-card h5 {
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #f3f4f6;
+    }
+    .form-group label { font-weight: 600; color: #4b5563; margin-bottom: 0.5rem; }
+    .form-control { border-radius: var(--radius-md); padding: 0.75rem; }
+    .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); }
+    .btn-save {
+      background: var(--primary-gradient);
+      border: none;
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); color: white; }
+    .btn-cancel {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      color: #4b5563;
+      padding: 0.75rem 2rem;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .btn-cancel:hover { background: #e5e7eb; color: #1f2937; }
+    /* Room Types Section */
+    .room-type-card {
+      background: linear-gradient(135deg, #fafafa 0%, #f3f4f6 100%);
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: var(--transition);
+    }
+    .room-type-card:hover { border-color: #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1); }
+    .room-type-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .room-type-name { font-size: 1.1rem; font-weight: 700; color: #1f2937; }
+    .room-type-price { font-size: 1.25rem; font-weight: 700; color: #667eea; }
+    .room-type-details { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .room-type-detail { display: flex; align-items: center; gap: 0.35rem; color: #6b7280; font-size: 0.9rem; }
+    .room-type-detail i { color: #667eea; }
+    .room-type-features { font-size: 0.85rem; color: #9ca3af; margin-top: 0.5rem; }
+    .btn-room-edit {
+      background: white;
+      border: 1px solid #e5e7eb;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #4b5563;
+      transition: var(--transition);
+    }
+    .btn-room-edit:hover { border-color: #667eea; color: #667eea; }
+    .btn-room-delete {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #dc2626;
+      transition: var(--transition);
+    }
+    .btn-room-delete:hover { background: #fecaca; }
+    .add-room-card {
+      background: white;
+      border: 2px dashed #d1d5db;
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .add-room-card:hover { border-color: #667eea; background: #f9fafb; }
+    .add-room-card i { font-size: 2rem; color: #9ca3af; margin-bottom: 0.5rem; }
+    .add-room-card p { margin: 0; color: #6b7280; font-weight: 500; }
+    /* Modal Styles */
+    .modal-header { background: var(--primary-gradient); color: white; }
+    .modal-header .close { color: white; opacity: 0.8; }
+    .modal-header .close:hover { opacity: 1; }
+    .btn-add-room {
+      background: var(--primary-gradient);
+      border: none;
+      color: white;
+      padding: 0.6rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .btn-add-room:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); color: white; }
+    .amenities-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+    .amenity-tag {
+      background: #e0f2fe;
+      color: #0284c7;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .badge-ac { background: #d1fae5; color: #065f46; }
+    .badge-nonac { background: #fef3c7; color: #92400e; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a class="navbar-brand" href="/">Roamly</a>
+  <div class="ml-auto">
+    <a href="/provider/dashboard" class="btn btn-back"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="page-header">
+    <h2><i class="bi bi-building"></i> <span th:text="${hotel != null ? 'Edit Hotel' : 'Add New Hotel'}">Add New Hotel</span></h2>
+    <p th:text="${hotel != null ? 'Update hotel information and manage room types' : 'Enter hotel details and add room types'}"></p>
+  </div>
+
+  <form id="hotelForm">
+    <input type="hidden" name="id" th:value="${hotel?.id}">
+
+    <div class="form-card">
+      <h5><i class="bi bi-info-circle"></i> Basic Information</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Hotel Name *</label>
+            <input type="text" name="name" class="form-control" required th:value="${hotel?.name}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Location *</label>
+            <input type="text" name="location" class="form-control" required th:value="${hotel?.location}">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" name="address" class="form-control" th:value="${hotel?.address}">
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Base Price/Night (₹) *</label>
+            <input type="number" name="pricePerNight" class="form-control" step="0.01" required th:value="${hotel?.pricePerNight}">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Rating (1-5)</label>
+            <input type="number" name="rating" class="form-control" step="0.1" min="1" max="5" th:value="${hotel?.rating}">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="text" name="imageUrl" class="form-control" th:value="${hotel?.imageUrl}">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Amenities</label>
+        <input type="text" name="amenities" class="form-control" placeholder="WiFi, Pool, Gym, Restaurant..." th:value="${hotel?.amenities}">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" class="form-control" rows="3" th:text="${hotel?.description}"></textarea>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h5><i class="bi bi-door-open"></i> Room Types</h5>
+      <p class="text-muted mb-3">Add different room categories with their prices and availability.</p>
+
+      <div id="roomTypesList">
+        <div th:each="rt : ${hotel?.roomTypes}" class="room-type-card" th:attr="data-room-id=${rt.id}">
+          <div class="room-type-header">
+            <span class="room-type-name" th:text="${rt.name}">Deluxe Room</span>
+            <div class="d-flex align-items-center gap-2">
+              <span class="room-type-price">₹<span th:text="${#numbers.formatDecimal(rt.pricePerNight, 1, 2)}">0</span><span class="small text-muted">/night</span></span>
+              <button type="button" class="btn btn-room-edit" th:attr="onclick=|editRoomType(${rt.id})|"><i class="bi bi-pencil"></i> Edit</button>
+              <button type="button" class="btn btn-room-delete" th:attr="onclick=|deleteRoomType(${rt.id})|"><i class="bi bi-trash"></i> Delete</button>
+            </div>
+          </div>
+          <div class="room-type-details">
+            <span class="room-type-detail"><i class="bi bi-people"></i> <span th:text="${rt.capacity}">2</span> Guests</span>
+            <span class="room-type-detail"><i class="bi bi-door-closed"></i> <span th:text="${rt.availableCount}">5</span> Rooms</span>
+            <span class="room-type-detail">
+              <i class="bi bi-snow"></i> <span th:text="${rt.ac ? 'AC' : 'Non-AC'}">AC</span>
+            </span>
+          </div>
+          <div class="room-type-features" th:if="${rt.features != null}" th:text="${rt.features}"></div>
+        </div>
+      </div>
+
+      <div class="add-room-card" data-toggle="modal" data-target="#roomTypeModal" onclick="openAddRoomType()">
+        <i class="bi bi-plus-circle"></i>
+        <p>Add Room Type</p>
+      </div>
+    </div>
+
+    <div class="d-flex gap-3 justify-content-end">
+      <a href="/provider/dashboard" class="btn btn-cancel">Cancel</a>
+      <button type="button" class="btn btn-save" onclick="saveHotel()">
+        <i class="bi bi-check-circle"></i> <span th:text="${hotel != null ? 'Update Hotel' : 'Save Hotel'}">Save Hotel</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Room Type Modal -->
+<div class="modal fade" id="roomTypeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-white"><i class="bi bi-door-open"></i> <span id="roomModalTitle">Add Room Type</span></h5>
+        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="roomTypeForm">
+          <input type="hidden" name="id" id="roomTypeId">
+          <input type="hidden" name="hotelId" id="roomHotelId" th:value="${hotel?.id}">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Room Type Name *</label>
+                <input type="text" name="name" id="roomTypeName" class="form-control" required placeholder="e.g., Deluxe, Suite, Premium">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Price/Night (₹) *</label>
+                <input type="number" name="pricePerNight" id="roomTypePrice" class="form-control" step="0.01" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Capacity (Guests) *</label>
+                <input type="number" name="capacity" id="roomTypeCapacity" class="form-control" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Available Rooms *</label>
+                <input type="number" name="availableCount" id="roomTypeCount" class="form-control" required>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>AC / Non-AC</label>
+            <select name="ac" id="roomTypeAC" class="form-control">
+              <option value="true">AC</option>
+              <option value="false">Non-AC</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Features</label>
+            <textarea name="features" id="roomTypeFeatures" class="form-control" rows="2" placeholder="King Bed, Ocean View, Mini Bar..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="text" name="imageUrl" id="roomTypeImage" class="form-control" placeholder="https://...">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-add-room" onclick="saveRoomType()">Save Room Type</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+const hotelId = [[${hotel?.id}]];
+const roomTypes = /*[[${hotel?.roomTypes != null ? hotel.roomTypes : T(java.util.Collections).emptyList()}]]*/ [];
+
+function saveHotel() {
+  const form = document.getElementById('hotelForm');
+  const fd = new FormData(form);
+  const data = Object.fromEntries(fd);
+  const method = hotelId ? 'PUT' : 'POST';
+  const url = hotelId ? '/provider/hotels/' + hotelId : '/provider/hotels';
+  fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) })
+    .then(r => r.json()).then(d => {
+      if (!hotelId) {
+        window.location.href = '/provider/hotels/' + d.id + '/edit';
+      } else {
+        window.location.href = '/provider/dashboard';
+      }
+    });
+}
+
+function openAddRoomType() {
+  document.getElementById('roomModalTitle').textContent = 'Add Room Type';
+  document.getElementById('roomTypeId').value = '';
+  document.getElementById('roomTypeName').value = '';
+  document.getElementById('roomTypePrice').value = '';
+  document.getElementById('roomTypeCapacity').value = '';
+  document.getElementById('roomTypeCount').value = '';
+  document.getElementById('roomTypeAC').value = 'true';
+  document.getElementById('roomTypeFeatures').value = '';
+  document.getElementById('roomTypeImage').value = '';
+  $('#roomTypeModal').modal('show');
+}
+
+function editRoomType(id) {
+  const rt = roomTypes.find(r => r.id === id);
+  if (!rt) return;
+  document.getElementById('roomModalTitle').textContent = 'Edit Room Type';
+  document.getElementById('roomTypeId').value = rt.id;
+  document.getElementById('roomTypeName').value = rt.name || '';
+  document.getElementById('roomTypePrice').value = rt.pricePerNight || '';
+  document.getElementById('roomTypeCapacity').value = rt.capacity || '';
+  document.getElementById('roomTypeCount').value = rt.availableCount || '';
+  document.getElementById('roomTypeAC').value = rt.ac ? 'true' : 'false';
+  document.getElementById('roomTypeFeatures').value = rt.features || '';
+  document.getElementById('roomTypeImage').value = rt.imageUrl || '';
+  $('#roomTypeModal').modal('show');
+}
+
+function saveRoomType() {
+  if (!hotelId) {
+    alert('Please save the hotel first before adding room types.');
+    return;
+  }
+  const form = document.getElementById('roomTypeForm');
+  const fd = new FormData(form);
+  const data = Object.fromEntries(fd);
+  data.ac = data.ac === 'true';
+  data.capacity = parseInt(data.capacity);
+  data.availableCount = parseInt(data.availableCount);
+  data.pricePerNight = parseFloat(data.pricePerNight);
+  const id = data.id;
+  const method = id ? 'PUT' : 'POST';
+  const url = id ? '/provider/hotels/' + hotelId + '/room-types/' + id : '/provider/hotels/' + hotelId + '/room-types';
+  fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) })
+    .then(r => { $('#roomTypeModal').modal('hide'); window.location.reload(); });
+}
+
+function deleteRoomType(id) {
+  if (!confirm('Delete this room type?')) return;
+  fetch('/provider/hotels/' + hotelId + '/room-types/' + id, { method: 'DELETE' })
+    .then(r => window.location.reload());
+}
+</script>
+</body>
+</html>

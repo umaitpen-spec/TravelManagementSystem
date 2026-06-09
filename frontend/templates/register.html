@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register - Roamly</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/static/css/style.css" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; min-height: 100vh; background: #f8fafc; }
+
+    .reg-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+    @media (max-width: 768px) {
+      .reg-wrap { grid-template-columns: 1fr; }
+      .reg-left { display: none; }
+    }
+
+    .reg-left {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .reg-left::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -20%;
+      width: 500px;
+      height: 500px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+    .reg-left-inner { position: relative; z-index: 1; text-align: center; }
+    .reg-left-inner h1 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -1px; }
+    .reg-left-inner p { font-size: 1.2rem; opacity: 0.9; max-width: 400px; }
+
+    .reg-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem;
+    }
+    .reg-card { width: 100%; max-width: 460px; }
+    .reg-card-header { margin-bottom: 2rem; }
+    .reg-card-header h2 { font-size: 1.75rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem; }
+    .reg-card-header p { color: #6b7280; margin: 0; }
+
+    .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .role-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: center;
+    }
+    .role-card:hover { border-color: #38ef7d; background: #f0fdf4; }
+    .role-card.selected { border-color: #11998e; background: #d1fae5; }
+    .role-card input { display: none; }
+    .role-card-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .role-card-title { font-weight: 600; color: #1f2937; font-size: 0.95rem; }
+    .role-card-desc { font-size: 0.8rem; color: #6b7280; margin-top: 0.25rem; }
+
+    .reg-field { margin-bottom: 1.25rem; }
+    .reg-field label { display: block; font-weight: 500; color: #374151; font-size: 0.9rem; margin-bottom: 0.4rem; }
+    .reg-input {
+      display: block;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #1f2937;
+      background: #ffffff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .reg-input:focus {
+      border-color: #38ef7d;
+      box-shadow: 0 0 0 3px rgba(56, 239, 125, 0.15);
+      outline: none;
+    }
+    .reg-input::placeholder { color: #9ca3af; }
+
+    .provider-fields { display: none; }
+    .provider-fields.show { display: block; }
+
+    .reg-btn {
+      display: block;
+      width: 100%;
+      padding: 0.85rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #ffffff;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 1rem;
+    }
+    .reg-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4);
+      color: #ffffff;
+    }
+
+    .reg-divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; color: #9ca3af; font-size: 0.85rem; }
+    .reg-divider::before, .reg-divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+
+    .reg-signin-btn {
+      display: block;
+      width: 100%;
+      padding: 0.85rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      text-align: center;
+      text-decoration: none;
+      color: #374151;
+      background: #ffffff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .reg-signin-btn:hover { border-color: #38ef7d; color: #11998e; }
+
+    .reg-alert { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+<div class="reg-wrap">
+  <div class="reg-left">
+    <div class="reg-left-inner">
+      <h1>🌍 Roamly</h1>
+      <p>Join thousands of travelers planning their perfect adventures.</p>
+    </div>
+  </div>
+
+  <div class="reg-right">
+    <div class="reg-card">
+      <div class="reg-card-header">
+        <h2>Create your account</h2>
+        <p>Start your travel planning journey today</p>
+      </div>
+      <div th:if="${registerError}" class="reg-alert" th:text="${registerError}"></div>
+
+      <form method="post" action="/auth/register">
+        <div class="role-grid">
+          <label class="role-card selected" id="role-user">
+            <input type="radio" name="role" value="ROLE_USER" checked>
+            <div class="role-card-icon">🧳</div>
+            <div class="role-card-title">Traveler</div>
+            <div class="role-card-desc">Plan trips &amp; track expenses</div>
+          </label>
+          <label class="role-card" id="role-provider">
+            <input type="radio" name="role" value="ROLE_SERVICE_PROVIDER">
+            <div class="role-card-icon">🏨</div>
+            <div class="role-card-title">Service Provider</div>
+            <div class="role-card-desc">Offer hotels or flights</div>
+          </label>
+        </div>
+
+        <div class="reg-field">
+          <label>Full Name</label>
+          <input type="text" name="name" class="reg-input" placeholder="Enter your name" required>
+        </div>
+        <div class="reg-field">
+          <label>Email Address</label>
+          <input type="email" name="email" class="reg-input" placeholder="Enter your email" required>
+        </div>
+        <div class="reg-field">
+          <label>Password</label>
+          <input type="password" name="password" class="reg-input" placeholder="Create a password" required minlength="6">
+        </div>
+
+        <div class="provider-fields" id="providerFields">
+          <div class="reg-field">
+            <label>Provider Type</label>
+            <select name="providerType" class="reg-input" id="providerType">
+              <option value="HOTEL_PROVIDER">🏨 Hotel Provider</option>
+              <option value="FLIGHT_PROVIDER">✈️ Flight Provider</option>
+            </select>
+          </div>
+          <div class="reg-field">
+            <label>Company Name</label>
+            <input type="text" name="providerCompany" class="reg-input" placeholder="Your company name">
+          </div>
+        </div>
+
+        <button class="reg-btn" type="submit">Create Account</button>
+      </form>
+
+      <div class="reg-divider">Already have an account?</div>
+      <a href="/login" class="reg-signin-btn">Sign In</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.role-card').forEach(function(el) {
+  el.addEventListener('click', function() {
+    document.querySelectorAll('.role-card').forEach(function(o) { o.classList.remove('selected'); });
+    el.classList.add('selected');
+    var pf = document.getElementById('providerFields');
+    if (el.id === 'role-provider') {
+      pf.classList.add('show');
+    } else {
+      pf.classList.remove('show');
+    }
+  });
+});
+</script>
+</body>
+</html>

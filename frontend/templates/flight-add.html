@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${flight != null ? 'Edit Flight' : 'Add Flight'} + ' - Roamly'">Flight Management - Roamly</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .navbar {
+      background: var(--primary-gradient) !important;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 15px rgba(102, 126, 234, 0.3);
+    }
+    .navbar-brand { color: white !important; font-weight: 700; font-size: 1.5rem; }
+    .btn-back {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      transition: var(--transition);
+    }
+    .btn-back:hover { background: rgba(255,255,255,0.25); color: white; }
+    .main-content { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+    .page-header {
+      background: var(--primary-gradient);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      color: white;
+    }
+    .page-header h2 { margin: 0; font-weight: 700; }
+    .page-header p { margin: 0.5rem 0 0; opacity: 0.9; }
+    .form-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 2rem;
+    }
+    .form-card h5 {
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #f3f4f6;
+    }
+    .form-group label { font-weight: 600; color: #4b5563; margin-bottom: 0.5rem; }
+    .form-control { border-radius: var(--radius-md); padding: 0.75rem; }
+    .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); }
+    .btn-save {
+      background: var(--primary-gradient);
+      border: none;
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); color: white; }
+    .btn-cancel {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      color: #4b5563;
+      padding: 0.75rem 2rem;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .btn-cancel:hover { background: #e5e7eb; color: #1f2937; }
+    .flight-class-card {
+      background: linear-gradient(135deg, #fafafa 0%, #f3f4f6 100%);
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: var(--transition);
+    }
+    .flight-class-card:hover { border-color: #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1); }
+    .flight-class-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .flight-class-name { font-size: 1.1rem; font-weight: 700; color: #1f2937; }
+    .flight-class-price { font-size: 1.25rem; font-weight: 700; color: #667eea; }
+    .flight-class-details { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .flight-class-detail { display: flex; align-items: center; gap: 0.35rem; color: #6b7280; font-size: 0.9rem; }
+    .flight-class-detail i { color: #667eea; }
+    .flight-class-features { font-size: 0.85rem; color: #9ca3af; margin-top: 0.5rem; }
+    .btn-class-edit {
+      background: white;
+      border: 1px solid #e5e7eb;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #4b5563;
+      transition: var(--transition);
+    }
+    .btn-class-edit:hover { border-color: #667eea; color: #667eea; }
+    .btn-class-delete {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #dc2626;
+      transition: var(--transition);
+    }
+    .btn-class-delete:hover { background: #fecaca; }
+    .add-class-card {
+      background: white;
+      border: 2px dashed #d1d5db;
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .add-class-card:hover { border-color: #667eea; background: #f9fafb; }
+    .add-class-card i { font-size: 2rem; color: #9ca3af; margin-bottom: 0.5rem; }
+    .add-class-card p { margin: 0; color: #6b7280; font-weight: 500; }
+    .modal-header { background: var(--primary-gradient); color: white; }
+    .modal-header .close { color: white; opacity: 0.8; }
+    .modal-header .close:hover { opacity: 1; }
+    .btn-add-class {
+      background: var(--primary-gradient);
+      border: none;
+      color: white;
+      padding: 0.6rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .btn-add-class:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); color: white; }
+    .amenity-tag {
+      background: #e0f2fe;
+      color: #0284c7;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .badge-refundable { background: #d1fae5; color: #065f46; }
+    .badge-non-refundable { background: #fef3c7; color: #92400e; }
+    .section-hint { font-size: 0.85rem; color: #9ca3af; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a class="navbar-brand" href="/">Roamly</a>
+  <div class="ml-auto">
+    <a href="/provider/dashboard" class="btn btn-back"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="page-header">
+    <h2><i class="bi bi-airplane"></i> <span th:text="${flight != null ? 'Edit Flight' : 'Add New Flight'}">Add New Flight</span></h2>
+    <p th:text="${flight != null ? 'Update flight information and manage seat classes' : 'Enter flight details and add seat classes'"></p>
+  </div>
+
+  <form id="flightForm">
+    <input type="hidden" name="id" th:value="${flight?.id}">
+
+    <div class="form-card">
+      <h5><i class="bi bi-info-circle"></i> Flight Information</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Airline Name *</label>
+            <input type="text" name="airline" class="form-control" required th:value="${flight?.airline}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Flight Number *</label>
+            <input type="text" name="flightNumber" class="form-control" required th:value="${flight?.flightNumber}">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <div class="form-group">
+            <label>Origin (Airport Code) *</label>
+            <input type="text" name="origin" class="form-control" required maxlength="3" placeholder="e.g., JFK" th:value="${flight?.origin}">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label>Destination (Airport Code) *</label>
+            <input type="text" name="destination" class="form-control" required maxlength="3" placeholder="e.g., LAX" th:value="${flight?.destination}">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label>Source City *</label>
+            <input type="text" name="sourceCity" class="form-control" required placeholder="e.g., New York" th:value="${flight?.sourceCity}">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label>Destination City *</label>
+            <input type="text" name="destinationCity" class="form-control" required placeholder="e.g., Los Angeles" th:value="${flight?.destinationCity}">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <div class="form-group">
+            <label>Departure Date *</label>
+            <input type="date" name="departureDate" class="form-control" required th:value="${flight?.departureDate}">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label>Departure Time *</label>
+            <input type="time" name="departureTime" class="form-control" required th:value="${flight?.departureTime}">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label>Arrival Time *</label>
+            <input type="time" name="arrivalTime" class="form-control" required th:value="${flight?.arrivalTime}">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label>Duration (minutes)</label>
+            <input type="number" name="duration" class="form-control" placeholder="e.g., 330" th:value="${flight?.duration}">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Flight Type *</label>
+            <select name="flightType" class="form-control" style="height: 45px;">
+              <option value="DOMESTIC" th:selected="${flight?.flightType == 'DOMESTIC'}">Domestic</option>
+              <option value="INTERNATIONAL" th:selected="${flight?.flightType == 'INTERNATIONAL'}">International</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Airline Logo URL</label>
+            <input type="text" name="airlineLogo" class="form-control" placeholder="https://..." th:value="${flight?.airlineLogo}">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="text" name="imageUrl" class="form-control" placeholder="https://..." th:value="${flight?.imageUrl}">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Baggage Details</label>
+        <input type="text" name="baggageDetails" class="form-control" placeholder="e.g., 23kg check-in, 7kg cabin" th:value="${flight?.baggageDetails}">
+      </div>
+      <div class="form-group">
+        <label>Amenities</label>
+        <input type="text" name="amenities" class="form-control" placeholder="WiFi, Power Outlet, Entertainment..." th:value="${flight?.amenities}">
+      </div>
+      <div class="form-group">
+        <label>Cancellation Policy</label>
+        <textarea name="cancellationPolicy" class="form-control" rows="2" placeholder="e.g., Free cancellation up to 24 hours before departure..." th:text="${flight?.cancellationPolicy}"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" class="form-control" rows="3" th:text="${flight?.description}"></textarea>
+      </div>
+    </div>
+
+    <div class="d-flex gap-3 justify-content-end mb-3">
+      <a href="/provider/dashboard" class="btn btn-cancel">Cancel</a>
+      <button type="button" class="btn btn-save" onclick="saveFlight()">
+        <i class="bi bi-check-circle"></i> <span th:text="${flight != null ? 'Update Flight' : 'Save Flight'}">Save Flight</span>
+      </button>
+    </div>
+
+    <div class="form-card">
+      <h5><i class="bi bi-tags"></i> Seat Classes</h5>
+      <p class="section-hint">Add different seat classes (Economy, Business, First Class) with their own pricing and seat availability.</p>
+
+      <div id="flightClassesList">
+        <div th:each="fc : ${flight?.flightClasses}" class="flight-class-card"
+          th:attr="data-class-id=${fc.id},
+                   data-class-type=${fc.classType},
+                   data-class-totalseats=${fc.totalSeats},
+                   data-class-availableseats=${fc.availableSeats},
+                   data-class-price=${fc.price},
+                   data-class-baggage=${fc.baggageLimit != null ? fc.baggageLimit : ''},
+                   data-class-refundable=${fc.refundable}">
+          <div class="flight-class-header">
+            <span class="flight-class-name" th:text="${fc.classType}">Economy</span>
+            <div class="d-flex align-items-center gap-2">
+              <span class="flight-class-price">₹<span th:text="${#numbers.formatDecimal(fc.price, 1, 2)}">0</span><span class="small text-muted">/ticket</span></span>
+              <button type="button" class="btn btn-class-edit" th:attr="onclick=|editFlightClass(${fc.id})|"><i class="bi bi-pencil"></i> Edit</button>
+              <button type="button" class="btn btn-class-delete" th:attr="onclick=|deleteFlightClass(${fc.id})|"><i class="bi bi-trash"></i> Delete</button>
+            </div>
+          </div>
+          <div class="flight-class-details">
+            <span class="flight-class-detail"><i class="bi bi-people"></i> <span th:text="${fc.totalSeats}">0</span> Total Seats</span>
+            <span class="flight-class-detail"><i class="bi bi-door-closed"></i> <span th:text="${fc.availableSeats}">0</span> Available</span>
+            <span class="flight-class-detail" th:if="${fc.baggageLimit != null}"><i class="bi bi-briefcase"></i> <span th:text="${fc.baggageLimit}"></span></span>
+            <span class="flight-class-detail">
+              <i class="bi bi-arrow-left-circle"></i> <span th:text="${fc.refundable ? 'Refundable' : 'Non-Refundable'}"></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="add-class-card" data-toggle="modal" data-target="#flightClassModal" onclick="openAddFlightClass()">
+        <i class="bi bi-plus-circle"></i>
+        <p>Add Seat Class</p>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Flight Class Modal -->
+<div class="modal fade" id="flightClassModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-white"><i class="bi bi-tags"></i> <span id="classModalTitle">Add Seat Class</span></h5>
+        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="flightClassForm">
+          <input type="hidden" name="id" id="flightClassId">
+          <input type="hidden" name="flightId" id="flightClassFlightId" th:value="${flight?.id}">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Class Type *</label>
+                <select name="classType" id="flightClassType" class="form-control" style="height: 45px;" required>
+                  <option value="">Select Class</option>
+                  <option value="ECONOMY">Economy</option>
+                  <option value="PREMIUM_ECONOMY">Premium Economy</option>
+                  <option value="BUSINESS">Business</option>
+                  <option value="FIRST_CLASS">First Class</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Price per Ticket (₹) *</label>
+                <input type="number" name="price" id="flightClassPrice" class="form-control" step="0.01" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Total Seats *</label>
+                <input type="number" name="totalSeats" id="flightClassTotalSeats" class="form-control" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Available Seats *</label>
+                <input type="number" name="availableSeats" id="flightClassAvailableSeats" class="form-control" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Baggage Limit</label>
+                <input type="text" name="baggageLimit" id="flightClassBaggage" class="form-control" placeholder="e.g., 23kg check-in, 7kg cabin">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Refundable</label>
+                <select name="refundable" id="flightClassRefundable" class="form-control" style="height: 45px;">
+                  <option value="true">Yes - Refundable</option>
+                  <option value="false">No - Non-Refundable</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-add-class" onclick="saveFlightClass()">Save Seat Class</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<input type="hidden" id="flightIdField" th:value="${flight?.id}">
+<script th:inline="javascript">
+const flightId = (document.getElementById('flightIdField').value || '').trim();
+
+function saveFlight() {
+  const form = document.getElementById('flightForm');
+  const fd = new FormData(form);
+  const data = Object.fromEntries(fd);
+  const method = flightId ? 'PUT' : 'POST';
+  const url = flightId ? '/provider/flights/' + flightId : '/provider/flights';
+  fetch(url, { method, headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(data) })
+    .then(r => { if (!r.ok) throw new Error('Save failed'); return r.json(); })
+    .then(d => {
+      if (!flightId) {
+        window.location.href = '/provider/flights/' + d.id + '/edit';
+      } else {
+        window.location.href = '/provider/dashboard';
+      }
+    }).catch(e => { console.error(e); alert('Failed to save flight'); });
+}
+
+function openAddFlightClass() {
+  document.getElementById('classModalTitle').textContent = 'Add Seat Class';
+  document.getElementById('flightClassId').value = '';
+  document.getElementById('flightClassType').value = '';
+  document.getElementById('flightClassPrice').value = '';
+  document.getElementById('flightClassTotalSeats').value = '';
+  document.getElementById('flightClassAvailableSeats').value = '';
+  document.getElementById('flightClassBaggage').value = '';
+  document.getElementById('flightClassRefundable').value = 'false';
+  $('#flightClassModal').modal('show');
+}
+
+function editFlightClass(id) {
+  const card = document.querySelector('.flight-class-card[data-class-id="' + id + '"]');
+  if (!card) { alert('Seat class not found'); return; }
+  document.getElementById('classModalTitle').textContent = 'Edit Seat Class';
+  document.getElementById('flightClassId').value = id;
+  document.getElementById('flightClassType').value = card.dataset.classType || '';
+  document.getElementById('flightClassPrice').value = card.dataset.classPrice || '';
+  document.getElementById('flightClassTotalSeats').value = card.dataset.classTotalseats || '';
+  document.getElementById('flightClassAvailableSeats').value = card.dataset.classAvailableseats || '';
+  document.getElementById('flightClassBaggage').value = card.dataset.classBaggage || '';
+  document.getElementById('flightClassRefundable').value = card.dataset.classRefundable === 'true' ? 'true' : 'false';
+  $('#flightClassModal').modal('show');
+}
+
+function saveFlightClass() {
+  if (!flightId) {
+    alert('Please save the flight first before adding seat classes.');
+    return;
+  }
+  const form = document.getElementById('flightClassForm');
+  const fd = new FormData(form);
+  const data = Object.fromEntries(fd);
+  data.totalSeats = parseInt(data.totalSeats);
+  data.availableSeats = parseInt(data.availableSeats);
+  data.price = parseFloat(data.price);
+  data.refundable = data.refundable === 'true';
+  const id = (data.id || '').trim();
+  const method = id ? 'PUT' : 'POST';
+  const url = id ? '/provider/flights/' + flightId + '/classes/' + id : '/provider/flights/' + flightId + '/classes';
+  console.log('Saving flight class:', method, url, data);
+  fetch(url, { method, headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(data) })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status + ': Save failed'); return r.json(); })
+    .then(d => { $('#flightClassModal').modal('hide'); window.location.reload(); })
+    .catch(e => { console.error(e); alert('Failed to save seat class: ' + e.message); });
+}
+
+function deleteFlightClass(id) {
+  if (!confirm('Delete this seat class?')) return;
+  fetch('/provider/flights/' + flightId + '/classes/' + id, { method: 'DELETE', credentials: 'include' })
+    .then(r => window.location.reload());
+}
+</script>
+</body>
+</html>

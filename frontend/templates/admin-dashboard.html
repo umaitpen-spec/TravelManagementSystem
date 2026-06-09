@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard - Roamly</title>
+  <link href="/static/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --admin-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --card-shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .navbar {
+      background: var(--admin-gradient) !important;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 15px rgba(17, 153, 142, 0.3);
+    }
+    .navbar-brand { color: white !important; font-weight: 700; font-size: 1.5rem; }
+    .welcome-text { color: rgba(255,255,255,0.95); font-weight: 500; }
+    .btn-signout {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: white; padding: 0.4rem 1rem; border-radius: 30px; transition: var(--transition);
+    }
+    .btn-signout:hover { background: rgba(255,255,255,0.25); color: white; }
+    .main-content { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .dashboard-header {
+      background: var(--admin-gradient);
+      border-radius: var(--radius-lg); padding: 2.5rem; margin-bottom: 2rem; color: white; position: relative; overflow: hidden;
+    }
+    .dashboard-header::before {
+      content: ''; position: absolute; top: -50%; right: -10%;
+      width: 300px; height: 300px; background: rgba(255,255,255,0.1); border-radius: 50%;
+    }
+    .header-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem; }
+    .header-subtitle { font-size: 1.1rem; opacity: 0.9; margin: 0; }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .stat-card {
+      background: white; border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--card-shadow);
+      transition: var(--transition); text-align: center; position: relative; overflow: hidden;
+    }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: var(--card-shadow-hover); }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: var(--admin-gradient);
+    }
+    .stat-number { font-size: 2.5rem; font-weight: 700; color: #11998e; }
+    .stat-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; font-weight: 600; margin-top: 0.25rem; }
+    .section-card { background: white; border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--card-shadow); margin-bottom: 1.5rem; }
+    .section-title { font-size: 1.25rem; font-weight: 700; color: #1f2937; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .section-title i { color: #11998e; }
+    .user-table td, .user-table th { vertical-align: middle; }
+    .badge-role { padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-admin { background: #fee2e2; color: #991b1b; }
+    .badge-provider { background: #fef3c7; color: #92400e; }
+    .badge-user { background: #dbeafe; color: #1e40af; }
+    .badge-enabled { background: #d1fae5; color: #065f46; }
+    .badge-disabled { background: #fee2e2; color: #991b1b; }
+    .btn-toggle { cursor: pointer; }
+    .provider-badge { padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.7rem; font-weight: 600; }
+    .hotel-badge { background: #fce7f3; color: #9d174d; }
+    .flight-badge { background: #e0f2fe; color: #075985; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animation-delay-1 { animation: fadeInUp 0.5s ease-out 0.1s both; }
+    .animation-delay-2 { animation: fadeInUp 0.5s ease-out 0.2s both; }
+    .animation-delay-3 { animation: fadeInUp 0.5s ease-out 0.3s both; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+  <a class="navbar-brand" href="/">Roamly Admin</a>
+  <div class="ml-auto d-flex align-items-center">
+    <span class="welcome-text mr-3">🔒 <span th:text="${userName}"></span></span>
+    <form method="post" action="/logout" class="mb-0">
+      <button type="submit" class="btn btn-signout btn-sm">Sign Out</button>
+    </form>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="dashboard-header">
+    <h1 class="header-title"><i class="bi bi-shield-check"></i> Admin Dashboard</h1>
+    <p class="header-subtitle">Manage users, providers, and platform analytics.</p>
+  </div>
+
+  <div class="stats-row animation-delay-1">
+    <div class="stat-card">
+      <div class="stat-number" th:text="${totalUsers}">0</div>
+      <div class="stat-label">Total Travelers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" th:text="${totalProviders}">0</div>
+      <div class="stat-label">Service Providers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" th:text="${allTrips != null ? allTrips.size() : 0}">0</div>
+      <div class="stat-label">Total Trips</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" th:text="${hotels != null ? hotels.size() : 0}">0</div>
+      <div class="stat-label">Hotels Listed</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-6 animation-delay-2">
+      <div class="section-card">
+        <h5 class="section-title"><i class="bi bi-people"></i> All Users</h5>
+        <table class="table user-table">
+          <thead>
+            <tr>
+              <th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="u : ${allUsers}">
+              <td th:text="${u.name}"></td>
+              <td th:text="${u.email}"></td>
+              <td>
+                <span th:if="${u.role.name() == 'ROLE_ADMIN'}" class="badge-role badge-admin">ADMIN</span>
+                <span th:if="${u.role.name() == 'ROLE_SERVICE_PROVIDER'}" class="badge-role badge-provider">PROVIDER</span>
+                <span th:if="${u.role.name() == 'ROLE_USER'}" class="badge-role badge-user">USER</span>
+              </td>
+              <td>
+                <span th:if="${u.enabled}" class="badge-role badge-enabled">Active</span>
+                <span th:if="${!u.enabled}" class="badge-role badge-disabled">Disabled</span>
+              </td>
+              <td>
+                <button th:if="${u.role.name() != 'ROLE_ADMIN'}"
+                        class="btn btn-sm btn-outline-secondary btn-toggle"
+                        th:attr="onclick=|toggleUser(${u.id})|"
+                        th:text="${u.enabled ? 'Disable' : 'Enable'}"></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="col-lg-6 animation-delay-3">
+      <div class="section-card">
+        <h5 class="section-title"><i class="bi bi-building"></i> Service Providers</h5>
+        <div th:each="p : ${providers}" class="mb-3 p-3 border rounded">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <strong th:text="${p.name}"></strong>
+              <span th:if="${p.providerType.name() == 'HOTEL_PROVIDER'}" class="provider-badge hotel-badge ml-2">HOTEL</span>
+              <span th:if="${p.providerType.name() == 'FLIGHT_PROVIDER'}" class="provider-badge flight-badge ml-2">FLIGHT</span>
+              <div class="text-muted small" th:text="${p.email}"></div>
+              <div class="text-muted small" th:text="${p.providerCompany}"></div>
+            </div>
+            <div>
+              <span th:if="${p.enabled}" class="badge-role badge-enabled">Active</span>
+              <span th:if="${!p.enabled}" class="badge-role badge-disabled">Disabled</span>
+            </div>
+          </div>
+        </div>
+        <div th:if="${providers == null or providers.isEmpty()}" class="text-muted text-center py-3">No providers yet.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleUser(id) {
+  fetch('/admin/users/' + id + '/toggle', { method: 'POST' })
+    .then(r => r.json())
+    .then(d => location.reload())
+    .catch(e => alert('Error toggling user'));
+}
+</script>
+</body>
+</html>

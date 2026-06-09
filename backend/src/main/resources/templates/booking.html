@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bookings - Roamly</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a1a;
+      --text-secondary: #717171;
+      --text-muted: #9ca3af;
+      --accent: #1b4965;
+      --accent-hover: #0056b3;
+      --success: #008009;
+      --warning: #e8a800;
+      --danger: #c23500;
+      --border-color: #e0e0e0;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--bg-secondary) !important;
+      padding: 0.8rem 2rem;
+      box-shadow: var(--shadow-sm);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar-brand {
+      color: var(--accent) !important;
+      font-weight: 700;
+      font-size: 1.4rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .navbar-brand .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .nav-link-item {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0.5rem 0;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .nav-link-item:hover, .nav-link-item.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .welcome-text { color: var(--text-secondary); font-size: 0.9rem; }
+    .btn-signout {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-signout:hover {
+      background: var(--text-primary);
+      color: white;
+      border-color: var(--text-primary);
+    }
+
+    /* Main Container */
+    .page-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Hero Header */
+    .hero-header {
+      background: var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero-header h1 {
+      color: white;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .hero-header p {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    /* Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 2rem;
+    }
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+    .card-header-custom {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .card-header-custom i {
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+    .card-header-custom h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .card-body-custom {
+      padding: 1.5rem;
+    }
+
+    /* Form Styles */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      transition: color 0.3s ease;
+      z-index: 2;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      background: #fafafa;
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+
+    .form-control::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(27, 73, 101, 0.1);
+    }
+
+    /* Select styling */
+    select.form-control {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+    }
+
+    /* Button */
+    .btn-primary-custom {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      border: none;
+      color: white;
+      padding: 0.9rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+      color: white;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-continue {
+      margin-top: 1.5rem;
+    }
+
+    /* Recent Bookings */
+    .booking-item {
+      background: #fafafa;
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s;
+    }
+
+    .booking-item:hover {
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    .booking-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .booking-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .booking-type {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .booking-type i {
+      color: var(--accent);
+    }
+
+    .booking-price {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .booking-details {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .booking-details span {
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state h6 {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Alert */
+    .alert {
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .alert-success {
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      color: var(--success);
+    }
+
+    /* Trip helper button */
+    .trip-helper {
+      margin-top: 1rem;
+    }
+
+    .btn-outline-primary {
+      background: transparent;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-outline-primary:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar { padding: 0.75rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+      .nav-links { display: none; }
+      .page-container { padding: 1rem; }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card { animation: fadeInUp 0.4s ease-out; }
+    .bookings-card { animation-delay: 0.1s; }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a class="navbar-brand" href="/">
+      <span class="brand-icon"><i class="bi bi-globe-americas"></i></span>
+      Roamly
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link-item">Dashboard</a>
+      <a href="/trips/new" class="nav-link-item">Plan a Trip</a>
+      <a href="/my-bookings" class="nav-link-item active">My Bookings</a>
+      <a href="/hotels" class="nav-link-item">Hotels</a>
+      <a href="/flights/search" class="nav-link-item">Flights</a>
+      <a href="/expenses" class="nav-link-item">Expenses</a>
+    </div>
+    <div class="nav-user">
+      <span class="welcome-text" th:text="${userName != null} ? ('Welcome, ' + ${userName}) : ''"></span>
+      <form method="post" action="/logout" class="mb-0">
+        <button type="submit" class="btn-signout">Sign Out</button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="page-container">
+    <!-- Hero Header -->
+    <div class="hero-header">
+      <h1>🧳 Booking Management</h1>
+      <p>Manage your travel bookings seamlessly.</p>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+      <!-- Main Card -->
+      <div class="card">
+        <div class="card-header-custom">
+          <i class="bi bi-airplane"></i>
+          <h3>Add New Booking</h3>
+        </div>
+        <div class="card-body-custom">
+          <p class="text-muted mb-3" th:if="${trip == null}">📍 Select a trip to manage bookings.</p>
+          <p class="text-muted mb-3" th:if="${trip != null}">Managing bookings for: <strong th:text="${trip.title}"></strong></p>
+
+          <!-- Trip Selection Form -->
+          <form method="get" action="/bookings">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Select Trip</label>
+                <div class="input-wrapper">
+                  <select class="form-control" name="tripId" required>
+                    <option value="" disabled th:selected="${trip == null}">Choose a trip...</option>
+                    <option th:each="t : ${trips}"
+                            th:value="${t.id}"
+                            th:text="${t.title} + ' - ' + ${t.destination}"
+                            th:selected="${trip != null and t.id == trip.id}">
+                    </option>
+                  </select>
+                  <i class="bi bi-compass input-icon" style="z-index: 0;"></i>
+                </div>
+              </div>
+              <div class="form-group d-flex align-items-end">
+                <button class="btn-primary-custom btn-block" type="submit">
+                  <i class="bi bi-arrow-right-circle"></i>
+                  <span th:if="${trip == null}">Continue</span>
+                  <span th:if="${trip != null}">Load Trip</span>
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Single trip helper -->
+          <div class="trip-helper" th:if="${trips != null and trips.size() == 1 and trip == null}">
+            <a th:href="@{/bookings(tripId=${trips[0].id})}" class="btn-outline-primary btn-block">
+              <i class="bi bi-lightning"></i>
+              Continue with your only trip
+            </a>
+          </div>
+
+          <!-- Booking Form -->
+          <form id="bookingForm" method="post"
+                th:action="@{/trips/{id}/bookings(id=${trip.id})}"
+                th:if="${trip != null}">
+            <div class="form-row" style="margin-top: 1.5rem;">
+              <div class="form-group">
+                <label>Provider</label>
+                <div class="input-wrapper">
+                  <input type="text" class="form-control" id="provider" name="provider" placeholder="e.g., OYO, Airbnb" required>
+                  <i class="bi bi-building input-icon"></i>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Type</label>
+                <div class="input-wrapper">
+                  <select class="form-control" id="bookingType" name="bookingType">
+                    <option>HOTEL</option>
+                    <option>FLIGHT</option>
+                  </select>
+                  <i class="bi bi-tag input-icon" style="z-index: 0;"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Reference</label>
+                <div class="input-wrapper">
+                  <input type="text" class="form-control" id="reference" name="reference" placeholder="Booking confirmation #" required>
+                  <i class="bi bi-hash input-icon"></i>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Price (INR)</label>
+                <div class="input-wrapper">
+                  <input type="number" class="form-control" id="price" name="price" placeholder="0.00" required>
+                  <i class="bi bi-currency-rupee input-icon"></i>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-primary-custom" type="submit">
+              <i class="bi bi-plus-circle"></i>
+              Add Booking
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Recent Bookings Card -->
+      <div class="card bookings-card">
+        <div class="card-header-custom">
+          <i class="bi bi-clock-history"></i>
+          <h3>Recent Bookings</h3>
+        </div>
+        <div class="card-body-custom">
+          <div th:if="${bookings != null and !bookings.isEmpty()}">
+            <div class="booking-item" th:each="booking : ${bookings}">
+              <div class="booking-header">
+                <div class="booking-type">
+                  <i class="bi" th:classappend="${booking.bookingType == 'HOTEL' ? 'bi-building' : 'bi-airplane'}"></i>
+                  <span th:text="${booking.bookingType}"></span>
+                </div>
+                <div class="booking-price">₹<span th:text="${#numbers.formatDecimal(booking.price, 1, 2)}">0</span></div>
+              </div>
+              <div class="booking-details">
+                <span><strong th:text="${booking.provider}"></strong></span>
+                <span>Ref: <span th:text="${booking.reference}"></span></span>
+              </div>
+            </div>
+          </div>
+
+          <div th:if="${bookings == null or bookings.isEmpty()}" class="empty-state">
+            <i class="bi bi-calendar-x"></i>
+            <h6>📭 No bookings yet</h6>
+            <p>Your upcoming reservations will appear here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

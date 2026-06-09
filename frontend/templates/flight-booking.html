@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${flight.airline} + ' - Book Flight - Roamly'">Flight Booking - Roamly</title>
+  <link href="/static/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --flight-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --radius-lg: 16px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .navbar {
+      background: var(--primary-gradient) !important;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 15px rgba(102, 126, 234, 0.3);
+    }
+    .navbar-brand { color: white !important; font-weight: 700; font-size: 1.5rem; }
+    .welcome-text { color: rgba(255,255,255,0.95); font-weight: 500; }
+    .btn-signout {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: white; padding: 0.4rem 1rem; border-radius: 30px; transition: var(--transition);
+    }
+    .btn-signout:hover { background: rgba(255,255,255,0.25); color: white; }
+    .page-wrapper { display: flex; min-height: calc(100vh - 70px); }
+    .sidebar { width: 260px; background: #1e293b; padding: 2rem 0; position: fixed; height: calc(100vh - 70px); overflow-y: auto; }
+    .sidebar-brand { color: white; font-size: 1.5rem; font-weight: 700; padding: 0 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem; }
+    .sidebar-nav { list-style: none; padding: 0; margin: 0; }
+    .sidebar-nav li { margin: 0.25rem 0; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.5rem; color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 500; transition: var(--transition); }
+    .sidebar-nav a:hover { background: rgba(255,255,255,0.05); color: white; }
+    .sidebar-nav a.active { background: rgba(255,255,255,0.1); color: white; border-left: 3px solid #667eea; }
+    .sidebar-nav a i { font-size: 1.1rem; width: 20px; text-align: center; }
+    .main-content { flex: 1; margin-left: 260px; padding: 2rem; }
+    .btn-back { background: white; border: 1px solid #e5e7eb; color: #667eea; padding: 0.5rem 1rem; border-radius: 30px; font-weight: 600; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; text-decoration: none; }
+    .btn-back:hover { background: #667eea; border-color: #667eea; color: white; }
+    .flight-info-card { background: white; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--card-shadow); margin-bottom: 2rem; }
+    .flight-info-header { background: var(--primary-gradient); padding: 1.5rem; color: white; }
+    .flight-info-header h2 { font-weight: 700; margin-bottom: 0.25rem; }
+    .flight-info-header .flight-num { opacity: 0.9; font-size: 0.9rem; }
+    .flight-info-body { padding: 1.5rem; }
+    .flight-route { display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1rem; }
+    .flight-city { font-size: 1.5rem; font-weight: 700; color: #1f2937; }
+    .flight-time { font-size: 1.1rem; color: #6b7280; }
+    .route-divider { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+    .route-line { width: 100px; height: 2px; background: linear-gradient(90deg, #667eea, #00f2fe); }
+    .route-duration { font-size: 0.8rem; color: #6b7280; }
+    .flight-meta { display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; }
+    .meta-item { text-align: center; }
+    .meta-label { font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; }
+    .meta-value { font-weight: 600; color: #1f2937; }
+    .booking-form-card { background: white; border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--card-shadow); }
+    .form-section-title { font-size: 1.1rem; font-weight: 700; color: #1f2937; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .seat-class-option { border: 2px solid #e5e7eb; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; cursor: pointer; transition: var(--transition); }
+    .seat-class-option:hover { border-color: #4facfe; }
+    .seat-class-option.selected { border-color: #4facfe; background: rgba(79, 172, 254, 0.05); }
+    .seat-class-option .class-name { font-weight: 700; color: #1f2937; }
+    .seat-class-option .class-price { font-weight: 700; color: #4facfe; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { font-weight: 600; color: #374151; margin-bottom: 0.4rem; display: block; }
+    .form-control { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 0.95rem; transition: border-color 0.2s; }
+    .form-control:focus { border-color: #4facfe; outline: none; }
+    .passenger-card { background: #f9fafb; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e5e7eb; }
+    .passenger-card h6 { font-weight: 700; margin-bottom: 0.75rem; color: #4facfe; }
+    .btn-book { background: var(--flight-gradient); border: none; color: white; padding: 0.9rem 2rem; border-radius: 30px; font-weight: 700; font-size: 1rem; transition: var(--transition); width: 100%; margin-top: 1rem; }
+    .btn-book:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4); color: white; }
+    .btn-book:disabled { background: #d1d5db; cursor: not-allowed; }
+    .error-message { background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; }
+    .booking-summary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-top: 1rem; }
+    .booking-summary h5 { font-weight: 700; margin-bottom: 0.75rem; }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .summary-total { font-size: 1.5rem; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 0.75rem; margin-top: 0.75rem; }
+    @media (max-width: 968px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a class="navbar-brand" href="/">Roamly</a>
+  <div class="ml-auto d-flex align-items-center">
+    <span class="welcome-text mr-3" th:text="${userName != null} ? ('Welcome, ' + ${userName}) : ''"></span>
+    <form method="post" action="/logout" class="mb-0">
+      <button type="submit" class="btn btn-signout btn-sm">Sign Out</button>
+    </form>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <nav class="sidebar">
+    <div class="sidebar-brand">✈️ Roamly</div>
+    <ul class="sidebar-nav">
+      <li><a href="/"><i class="bi bi-house"></i><span>Dashboard</span></a></li>
+      <li><a href="/my-bookings"><i class="bi bi-calendar-check"></i><span>My Bookings</span></a></li>
+      <li><a href="/hotels"><i class="bi bi-building"></i><span>Hotels</span></a></li>
+      <li><a href="/flights/search"><i class="bi bi-airplane"></i><span>Flights</span></a></li>
+      <li><a href="/expenses"><i class="bi bi-wallet2"></i><span>Expenses</span></a></li>
+      <li><a href="/trips/new"><i class="bi bi-plus-circle"></i><span>Create Trip</span></a></li>
+    </ul>
+  </nav>
+
+  <main class="main-content">
+    <a href="/flights/search" class="btn btn-back"><i class="bi bi-arrow-left"></i> Back to Flights</a>
+    <div id="errorMessage" class="error-message"></div>
+
+    <div class="flight-info-card">
+      <div class="flight-info-header">
+        <h2 th:text="${flight.airline} ?: 'Unknown Airline'">Airline Name</h2>
+        <div class="flight-num" th:text="${flight.flightNumber} ?: ''">Flight XX1234</div>
+      </div>
+      <div class="flight-info-body">
+        <div class="flight-route">
+          <div class="text-center">
+            <div class="flight-city" th:text="${flight.sourceCity ?: flight.origin}">Delhi</div>
+            <div class="flight-time" th:text="${flight.departureTime != null and !flight.departureTime.isEmpty()} ? ${flight.departureTime.substring(0, 5)} : '--:--'">09:00</div>
+          </div>
+          <div class="route-divider">
+            <div class="route-line"></div>
+            <div class="route-duration" th:text="${flight.duration}">2h 30m">2h 30m</div>
+          </div>
+          <div class="text-center">
+            <div class="flight-city" th:text="${flight.destinationCity ?: flight.destination}">Mumbai</div>
+            <div class="flight-time" th:text="${flight.arrivalTime != null and !flight.arrivalTime.isEmpty()} ? ${flight.arrivalTime.substring(0, 5)} : '--:--'">11:30</div>
+          </div>
+        </div>
+        <div class="flight-meta">
+          <div class="meta-item">
+            <div class="meta-label">Date</div>
+            <div class="meta-value" th:text="${flight.departureDate}">Jun 15, 2024</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Flight Type</div>
+            <div class="meta-value" th:text="${flight.flightType}">Domestic</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Baggage</div>
+            <div class="meta-value" th:text="${flight.baggageDetails != null ? flight.baggageDetails : 'N/A'}">23kg check-in</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form id="bookingForm" class="booking-form-card" onsubmit="return submitBooking(event)">
+      <input type="hidden" id="flightId" th:value="${flight.id}">
+      <input type="hidden" id="selectedFlightClassId">
+
+      <h4 class="form-section-title"><i class="bi bi-airplane"></i> Select Seat Class</h4>
+      <div id="seatClassContainer" class="mb-4">
+        <div th:each="fc : ${flight.flightClasses}" class="seat-class-option"
+          th:attr="data-class-id=${fc.id}, data-class-type=${fc.classType}, data-price=${fc.price}, data-available=${fc.availableSeats}"
+          onclick="selectSeatClass(this)">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="class-name" th:text="${#strings.replace(fc.classType, '_', ' ')}">Economy</div>
+              <div class="text-muted" style="font-size: 0.8rem;">
+                <span th:text="${fc.availableSeats}">0</span> seats available
+                <span th:if="${fc.refundable}" class="badge badge-refundable ml-1" style="font-size: 0.7rem;">Refundable</span>
+                <span th:if="${fc.baggageLimit != null}" class="ml-1" style="font-size: 0.75rem;"><i class="bi bi-briefcase"></i> <span th:text="${fc.baggageLimit}">23kg</span></span>
+              </div>
+            </div>
+            <div class="class-price">₹<span th:text="${#numbers.formatDecimal(fc.price, 1, 'COMMA', 0, 'POINT')}">0</span></div>
+          </div>
+        </div>
+        <div th:if="${flight.flightClasses == null or flight.flightClasses.isEmpty()}" class="alert alert-warning">
+          No seat classes available for this flight.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Travel Date</label>
+        <input type="date" id="travelDate" class="form-control" required th:value="${flight.departureDate}">
+      </div>
+
+      <div class="form-group">
+        <label>Number of Passengers</label>
+        <input type="number" id="passengerCount" class="form-control" min="1" max="9" value="1" required onchange="updatePassengers()">
+      </div>
+
+      <div id="passengersContainer"></div>
+
+      <div class="booking-summary">
+        <h5><i class="bi bi-receipt"></i> Fare Summary</h5>
+        <div class="summary-row">
+          <span>Base Fare (×<span id="paxCount">1</span> pax)</span>
+          <span>₹<span id="baseFare">0</span></span>
+        </div>
+        <div class="summary-row">
+          <span>Taxes & Fees (18%)</span>
+          <span>₹<span id="taxes">0</span></span>
+        </div>
+        <div class="summary-total">
+          <span>Total Amount</span>
+          <span>₹<span id="totalPrice">0</span></span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-book"><i class="bi bi-airplane"></i> Confirm Booking</button>
+    </form>
+  </main>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let selectedClassId = null;
+let selectedPrice = 0;
+
+function selectSeatClass(el) {
+  if (!el.dataset.classId) return;
+  document.querySelectorAll('.seat-class-option').forEach(opt => opt.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedClassId = el.dataset.classId;
+  selectedPrice = parseFloat(el.dataset.price) || 0;
+  document.getElementById('selectedFlightClassId').value = selectedClassId;
+  updatePrice();
+}
+
+function updatePassengers() {
+  const count = parseInt(document.getElementById('passengerCount').value) || 1;
+  const container = document.getElementById('passengersContainer');
+  container.innerHTML = '';
+  for (let i = 1; i <= count; i++) {
+    container.innerHTML += `
+      <div class="passenger-card">
+        <h6>Passenger ${i}</h6>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" class="form-control passenger-name" required placeholder="As per ID proof">
+        </div>
+        <div class="form-row d-flex gap-2">
+          <div class="form-group flex-fill">
+            <label>Email</label>
+            <input type="email" class="form-control passenger-email" required placeholder="Email">
+          </div>
+          <div class="form-group flex-fill">
+            <label>Phone</label>
+            <input type="tel" class="form-control passenger-phone" placeholder="Phone">
+          </div>
+        </div>
+        <div class="form-row d-flex gap-2">
+          <div class="form-group flex-fill">
+            <label>Age</label>
+            <input type="number" class="form-control passenger-age" min="1" max="120" placeholder="Age">
+          </div>
+          <div class="form-group flex-fill">
+            <label>Gender</label>
+            <select class="form-control passenger-gender">
+              <option value="">Select</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  updatePrice();
+}
+
+function updatePrice() {
+  const count = parseInt(document.getElementById('passengerCount').value) || 1;
+  const pricePerPax = selectedPrice;
+  const baseFare = pricePerPax * count;
+  const taxes = Math.round(baseFare * 0.18);
+  const total = baseFare + taxes;
+
+  document.getElementById('paxCount').textContent = count;
+  document.getElementById('baseFare').textContent = baseFare.toLocaleString('en-IN');
+  document.getElementById('taxes').textContent = taxes.toLocaleString('en-IN');
+  document.getElementById('totalPrice').textContent = total.toLocaleString('en-IN');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const travelInput = document.getElementById('travelDate');
+  if (!travelInput.value) {
+    travelInput.value = new Date().toISOString().split('T')[0];
+  }
+  updatePassengers();
+  updatePrice();
+});
+
+function submitBooking(e) {
+  e.preventDefault();
+  const errorEl = document.getElementById('errorMessage');
+  errorEl.style.display = 'none';
+
+  const passengerCount = parseInt(document.getElementById('passengerCount').value) || 1;
+  const passengerNames = document.querySelectorAll('.passenger-name');
+  const passengerEmails = document.querySelectorAll('.passenger-email');
+  const passengerPhones = document.querySelectorAll('.passenger-phone');
+  const passengerAges = document.querySelectorAll('.passenger-age');
+  const passengerGenders = document.querySelectorAll('.passenger-gender');
+
+  const passengers = [];
+  for (let i = 0; i < passengerCount; i++) {
+    if (!passengerNames[i].value || !passengerEmails[i].value) {
+      errorEl.textContent = 'Please fill in all passenger details';
+      errorEl.style.display = 'block';
+      return false;
+    }
+    passengers.push({
+      passengerName: passengerNames[i].value,
+      email: passengerEmails[i].value,
+      phone: passengerPhones[i].value,
+      age: parseInt(passengerAges[i].value) || null,
+      gender: passengerGenders[i].value,
+      passengerType: 'ADULT'
+    });
+  }
+
+  const flightId = parseInt(document.getElementById('flightId').value);
+  const travelDate = document.getElementById('travelDate').value;
+
+  const request = {
+    flightId: flightId,
+    flightClassId: parseInt(selectedClassId),
+    passengerCount: passengerCount,
+    travelDate: travelDate,
+    passengers: passengers
+  };
+
+  fetch('/api/flight-bookings/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) {
+      errorEl.textContent = data.error;
+      errorEl.style.display = 'block';
+    } else {
+      alert('Booking confirmed! Reference: ' + (data.bookingReference || 'N/A'));
+      window.location.href = '/bookings';
+    }
+  })
+  .catch(() => {
+    errorEl.textContent = 'Booking failed. Please try again.';
+    errorEl.style.display = 'block';
+  });
+
+  return false;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Roamly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/static/css/style.css" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --accent: #1b4965;
+      --text-primary: #1a1a1a;
+      --text-secondary: #666666;
+      --border-color: #e0e0e0;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --transition-fast: 0.15s ease;
+      --transition-base: 0.3s ease;
+    }
+    body {
+      margin: 0;
+      background: var(--bg-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg-primary);
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      padding: 2rem;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 900px) {
+      .login-container { grid-template-columns: 1fr; gap: 2rem; }
+      .login-hero { display: none; }
+    }
+
+    .login-hero {
+      animation: slideUp 0.8s ease;
+    }
+
+    .login-hero-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .login-hero-brand-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .login-hero-brand-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      color: #fff;
+    }
+
+    .login-hero-brand-name {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .login-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .login-hero-badge i {
+      color: var(--accent);
+    }
+
+    .login-hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-top: 2rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: -1px;
+      color: var(--text-primary);
+    }
+
+    .login-hero p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+      max-width: 450px;
+    }
+
+    .login-features {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .login-feature {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      animation: slideUp 0.8s ease;
+      animation-fill-mode: both;
+    }
+
+    .login-feature:nth-child(1) { animation-delay: 0.1s; }
+    .login-feature:nth-child(2) { animation-delay: 0.2s; }
+    .login-feature:nth-child(3) { animation-delay: 0.3s; }
+
+    .login-feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .login-feature-text {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    .login-feature-text strong {
+      color: var(--text-primary);
+    }
+
+    .login-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-md);
+      animation: scaleIn 0.6s ease;
+      animation-delay: 0.2s;
+      animation-fill-mode: both;
+    }
+
+    .login-card-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      border-radius: var(--radius-md);
+      font-size: 1.75rem;
+      margin-bottom: 1.25rem;
+      color: white;
+      font-weight: 700;
+    }
+
+    .login-card-header h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .login-card-header p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .login-form .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .login-form .form-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .login-form .form-input {
+      width: 100%;
+      padding: 0.95rem 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+
+    .login-form .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(27, 73, 101, 0.1);
+    }
+
+    .login-form .form-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .login-submit {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-base);
+      margin-top: 0.5rem;
+    }
+
+    .login-submit:hover {
+      background: #15485a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(27, 73, 101, 0.3);
+      color: #fff;
+    }
+
+    .login-submit:active {
+      transform: translateY(0);
+    }
+
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .login-divider::before,
+    .login-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .login-register {
+      display: block;
+      width: 100%;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      text-align: center;
+      color: var(--accent);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-base);
+      text-decoration: none;
+    }
+
+    .login-register:hover {
+      background: var(--bg-primary);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .login-demo {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .login-demo-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .login-demo-account {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-primary);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: 1px solid transparent;
+    }
+
+    .login-demo-account:hover {
+      background: var(--bg-secondary);
+      border-color: var(--border-color);
+    }
+
+    .login-demo-account .role {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .login-demo-account .role.admin {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+    }
+
+    .login-demo-account .role.provider {
+      background: rgba(27, 73, 101, 0.1);
+      color: var(--accent);
+    }
+
+    .login-demo-account .email {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .login-demo-account .password {
+      color: var(--text-secondary);
+    }
+
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+
+    .google-btn:hover {
+      background: var(--bg-primary);
+      border-color: #4285F4;
+      box-shadow: 0 2px 8px rgba(66, 133, 244, 0.15);
+    }
+
+    .google-btn:active {
+      transform: translateY(0);
+    }
+
+    .google-icon {
+      flex-shrink: 0;
+    }
+
+    .login-alert {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      border-radius: var(--radius-md);
+      padding: 0.875rem 1rem;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      animation: slideDown 0.3s ease;
+    }
+
+    .login-alert-success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #16a34a;
+      border-radius: var(--radius-md);
+      padding: 0.875rem 1rem;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-container">
+      <div class="login-hero">
+        <div class="login-hero-brand">
+          <div class="login-hero-brand-row">
+            <div class="login-hero-brand-icon">
+              <i class="bi bi-globe-americas"></i>
+            </div>
+            <span class="login-hero-brand-name">Roamly</span>
+          </div>
+          <div class="login-hero-badge">
+            <i class="bi bi-lightning-charge-fill"></i>
+            AI-Powered Travel Planning
+          </div>
+        </div>
+        <h1>
+          Plan Less.<br>
+          Roam More.
+        </h1>
+        <p>
+          Your intelligent travel companion for crafting unforgettable journeys.
+          From hidden gems to seamless bookings — Roamly transforms how you explore the world.
+        </p>
+        <div class="login-features">
+          <div class="login-feature">
+            <div class="login-feature-icon">
+              <i class="bi bi-stars"></i>
+            </div>
+            <div class="login-feature-text">
+              <strong>AI-Generated Itineraries</strong> tailored to your preferences
+            </div>
+          </div>
+          <div class="login-feature">
+            <div class="login-feature-icon">
+              <i class="bi bi-building"></i>
+            </div>
+            <div class="login-feature-text">
+              <strong>Smart Hotel Bookings</strong> with real-time availability
+            </div>
+          </div>
+          <div class="login-feature">
+            <div class="login-feature-icon">
+              <i class="bi bi-airplane-engines"></i>
+            </div>
+            <div class="login-feature-text">
+              <strong>Flight Integration</strong> for seamless travel planning
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-card">
+        <div class="login-card-header">
+          <div class="login-logo">
+            <i class="bi bi-globe-americas"></i>
+          </div>
+          <h2>Welcome Back</h2>
+          <p>Sign in to continue to <strong style="color: var(--accent);">Roamly</strong></p>
+        </div>
+
+        <div th:if="${param.error}" class="login-alert">
+          <i class="bi bi-exclamation-circle me-2"></i>
+          Invalid email or password. Please try again.
+        </div>
+        <div th:if="${logoutSuccess}" class="login-alert-success">
+          <i class="bi bi-check-circle me-2"></i>
+          You have been signed out successfully.
+        </div>
+        <div th:if="${loginError}" class="login-alert" th:text="${loginError}"></div>
+        <div th:if="${regSuccess}" class="login-alert-success" th:text="${regSuccess}"></div>
+
+        <form class="login-form" method="post" action="/auth/login">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="text" name="username" class="form-input" placeholder="Enter your email" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-input" placeholder="Enter your password" required>
+          </div>
+          <button class="login-submit" type="submit">
+            <i class="bi bi-box-arrow-in-right me-2"></i>
+            Sign In
+          </button>
+        </form>
+
+        <div class="login-divider">Don't have an account?</div>
+
+        <a href="/register" class="login-register">
+          <i class="bi bi-person-plus me-2"></i>
+          Create an Account
+        </a>
+
+        <div class="login-divider">Or continue with</div>
+
+        <button id="googleSignIn" class="google-btn" type="button">
+          <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="login-demo">
+          <div class="login-demo-title">Demo Accounts</div>
+          <div class="login-demo-account" onclick="document.querySelector('[name=username]').value='admin@zoho.com'; document.querySelector('[name=password]').value='admin123';">
+            <span class="role admin">Admin</span>
+            <span class="email">admin@zoho.com</span>
+            <span class="password">/ admin123</span>
+          </div>
+          <div class="login-demo-account" onclick="document.querySelector('[name=username]').value='hotelprovider@demo.com'; document.querySelector('[name=password]').value='provider123';">
+            <span class="role provider">Hotel</span>
+            <span class="email">hotelprovider@demo.com</span>
+            <span class="password">/ provider123</span>
+          </div>
+          <div class="login-demo-account" onclick="document.querySelector('[name=username]').value='flightprovider@demo.com'; document.querySelector('[name=password]').value='provider123';">
+            <span class="role provider">Flight</span>
+            <span class="email">flightprovider@demo.com</span>
+            <span class="password">/ provider123</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GOOGLE_CLIENT_ID = '624853773135-tmkevaoob58lu0r7iamcs1k4f06o5ljs.apps.googleusercontent.com';
+
+    document.getElementById('googleSignIn').addEventListener('click', handleGoogleLogin);
+
+    function handleGoogleLogin() {
+      const nonce = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
+
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: async (response) => {
+          try {
+            const idToken = response.credential;
+            const res = await fetch('/auth/google', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ idToken, nonce })
+            });
+            const data = await res.json();
+            if (res.ok) {
+              sessionStorage.setItem('token', data.token);
+              sessionStorage.setItem('userId', data.userId);
+              sessionStorage.setItem('userName', data.name);
+              sessionStorage.setItem('userRole', data.role);
+              // Create server-side session so Spring Security session auth works for the rest of the app
+              await fetch('/auth/session-google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: data.token }),
+                credentials: 'include'
+              });
+              window.location.href = data.redirectUrl || '/';
+            } else {
+              alert('Google login failed: ' + (data.error || 'Unknown error'));
+            }
+          } catch (e) {
+            alert('Google login failed: ' + e.message);
+          }
+        }
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById('googleSignIn'),
+        { type: 'standard', shape: 'rectangular', width: '100%' }
+      );
+
+      google.accounts.id.prompt();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+/* Shared styles - page-specific styles are inline */
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+a { text-decoration: none; }
+
+/* Sticky Header/Navbar - applies to all pages */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: white !important;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  color: #1f2937 !important;
+}
+
+/* Ensure main content has proper spacing below sticky header */
+.container-fluid, .main-content {
+  padding-top: 1rem;
+}
+
+/* For pages with fixed sidebar layout */
+.page-wrapper {
+  padding-top: 1.5rem;
+}
+
+/* Sidebar stays fixed below navbar */
+.sidebar {
+  position: sticky;
+  top: 70px;
+  height: calc(100vh - 70px);
+}
