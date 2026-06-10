@@ -1,6 +1,7 @@
 package com.umaitpen.travelx.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umaitpen.travelx.dto.GoogleUserDTO;
 import com.umaitpen.travelx.dto.JwtResponse;
 import com.umaitpen.travelx.enums.AuthProvider;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
@@ -107,28 +109,31 @@ public class GoogleAuthService {
     }
 
     private Map<String, String> validateGoogleToken(String idToken) {
-        try {
-            String url = GOOGLE_TOKEN_INFO_URL + "?id_token=" + idToken;
-            JsonNode response = restTemplate.getForObject(url, JsonNode.class);
-            if (response == null) {
-                System.err.println("Google token validation: empty response");
-                return null;
-            }
-            if (response.has("error_description")) {
-                System.err.println("Google token validation error: " + response.get("error_description").asText());
-                return null;
-            }
-            if (response.has("sub") && response.has("email")) {
-                return Map.of(
-                        "sub", response.get("sub").asText(),
-                        "email", response.get("email").asText()
-                );
-            }
-            System.err.println("Google token validation: missing required fields (sub or email). Response: " + response);
-        } catch (Exception e) {
-            System.err.println("Google token validation failed: " + e.getMessage());
+        // Decode JWT payload directly (Google id_token is a signed JWT)
+        String[] parts = idToken.split("\\.");
+        if (parts.length != 3) {
+            throw new RuntimeException("Google token: invalid JWT format, expected 3 parts got " + parts.length);
         }
-        return null;
+        // Decode the payload (second part)
+        String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode json;
+        try {
+            json = mapper.readTree(payload);
+        } catch (Exception e) {
+            throw new RuntimeException("Google token: failed to parse JWT payload: " + e.getMessage());
+        }
+
+        String sub = json.has("sub") ? json.get("sub").asText() : null;
+        String email = json.has("email") ? json.get("email").asText() : null;
+
+        if (sub == null || sub.isBlank()) {
+            throw new RuntimeException("Google token: missing sub claim");
+        }
+        if (email == null || email.isBlank()) {
+            throw new RuntimeException("Google token: missing email claim");
+        }
+        return Map.of("sub", sub, "email", email);
     }
 
     private GoogleUserDTO fetchGoogleUser(String accessToken) {

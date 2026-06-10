@@ -6,10 +6,12 @@ import com.umaitpen.travelx.model.Flight;
 import com.umaitpen.travelx.model.Hotel;
 import com.umaitpen.travelx.model.Itinerary;
 import com.umaitpen.travelx.model.Trip;
+import com.umaitpen.travelx.enums.AuthProvider;
 import com.umaitpen.travelx.enums.ProviderType;
 import com.umaitpen.travelx.enums.Role;
 import com.umaitpen.travelx.model.User;
 import com.umaitpen.travelx.repository.ItineraryRepository;
+import com.umaitpen.travelx.repository.UserRepository;
 import com.umaitpen.travelx.service.AIService;
 import com.umaitpen.travelx.service.BookingService;
 import com.umaitpen.travelx.service.ExpenseService;
@@ -19,6 +21,8 @@ import com.umaitpen.travelx.service.TripService;
 import com.umaitpen.travelx.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,20 +48,111 @@ public class PageController {
     private final ExpenseService expenseService;
     private final AIService aiService;
     private final ItineraryRepository itineraryRepository;
+    private final UserRepository userRepository;
     private final HotelService hotelService;
     private final FlightService flightService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Long requireLogin(HttpSession session, RedirectAttributes redirectAttributes) {
-        Long ownerId = (Long) session.getAttribute("userId");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long ownerId = null;
+
+        System.out.println("=== requireLogin called ===");
+        System.out.println("Auth type: " + (auth != null && auth.getPrincipal() != null ? auth.getPrincipal().getClass().getName() : "null"));
+
+        // Check session first
+        ownerId = (Long) session.getAttribute("userId");
+        if (ownerId != null) {
+            System.out.println("=== Found userId from session: " + ownerId);
+            return ownerId;
+        }
+
+        // Check SecurityContext principal
+        if (auth != null && auth.getPrincipal() != null) {
+            Object principal = auth.getPrincipal();
+            if (principal instanceof Long) {
+                ownerId = (Long) principal;
+            } else if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oauth2User) {
+                // Get userId from attributes (if set by custom service)
+                Object userIdAttr = oauth2User.getAttributes().get("userId");
+                if (userIdAttr != null) {
+                    ownerId = ((Number) userIdAttr).longValue();
+                } else {
+                    // Fallback: get email and look up/create user
+                    String email = (String) oauth2User.getAttributes().get("email");
+                    String googleId = (String) oauth2User.getAttributes().get("sub");
+                    String name = (String) oauth2User.getAttributes().get("name");
+                    System.out.println("=== OAuth attrs - email: " + email + ", googleId: " + googleId);
+                    if (email != null) {
+                        try {
+                            java.util.Optional<User> userOpt = userRepository.findByEmail(email);
+                            if (userOpt.isPresent()) {
+                                ownerId = userOpt.get().getId();
+                                System.out.println("=== Found user by email: " + ownerId);
+                            } else if (googleId != null) {
+                                userOpt = userRepository.findByProviderId(googleId);
+                                if (userOpt.isPresent()) {
+                                    ownerId = userOpt.get().getId();
+                                    System.out.println("=== Found user by providerId: " + ownerId);
+                                }
+                            }
+                            // Create if still not found
+                            if (ownerId == null) {
+                                System.out.println("=== Creating user in requireLogin ===");
+                                User newUser = User.builder()
+                                    .email(email)
+                                    .name(name != null ? name : email.split("@")[0])
+                                    .password("")
+                                    .role(Role.ROLE_USER)
+                                    .authProvider(AuthProvider.GOOGLE)
+                                    .providerId(googleId != null ? googleId : "")
+                                    .enabled(true)
+                                    .build();
+                                newUser = userRepository.save(newUser);
+                                ownerId = newUser.getId();
+                                // Also set session
+                                session.setAttribute("userId", ownerId);
+                                session.setAttribute("userEmail", email);
+                                session.setAttribute("userName", name);
+                                System.out.println("=== Created user in requireLogin: " + ownerId);
+                            }
+                        } catch (Exception e) {
+                            System.out.println("=== Error in requireLogin: " + e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+
+        // Final check - session attribute
         if (ownerId == null) {
+            ownerId = (Long) session.getAttribute("userId");
+        }
+
+        if (ownerId == null) {
+            System.out.println("=== requireLogin returning null ===");
             redirectAttributes.addFlashAttribute("loginError", "Please sign in first.");
+        } else {
+            // Ensure session has userId
+            session.setAttribute("userId", ownerId);
         }
         return ownerId;
     }
 
     @GetMapping("/")
     public String dashboard(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+        System.out.println("=== / dashboard called ===");
+        System.out.println("Session userId: " + session.getAttribute("userId"));
+        System.out.println("Session id: " + session.getId());
+
+        // If session.userId is null but SecurityContext has userId, populate session
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (session.getAttribute("userId") == null && auth != null && auth.getPrincipal() != null && auth.getPrincipal() instanceof Long) {
+            Long userId = (Long) auth.getPrincipal();
+            session.setAttribute("userId", userId);
+            System.out.println("=== Populated session from SecurityContext: userId=" + userId);
+        }
+
         Long ownerId = requireLogin(session, redirectAttributes);
         if (ownerId == null) {
             return "redirect:/login";
@@ -102,7 +197,9 @@ public class PageController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(HttpSession session) {
+        System.out.println("=== /login page ===");
+        System.out.println("Session userId: " + session.getAttribute("userId"));
         return "login";
     }
 
